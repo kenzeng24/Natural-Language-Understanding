@@ -11,7 +11,7 @@ from tokenizer import Tokenizer
 from train_test import evaluate, train
 
 
-def train_lstm_model(lr=0.01, batch_size=32, testing=True, use_pretrained=True):
+def train_lstm_model(lr=0.01, batch_size=32, testing=False, use_pretrained=True):
     
     # get tokenizer and model 
     glove = Embeddings.from_file("data/glove_300d.txt")
