@@ -41,7 +41,7 @@ def train_lstm_model(lr=0.01, batch_size=32, testing=True, use_pretrained=True):
     train(model, train_data, val_data, 
           batch_size=batch_size, 
           max_epochs=30,
-          patience=5, 
+          patience=3, 
           lr=lr, 
           filename= f"checkpoints/{embeddings_used}_{lr}_{batch_size}.pt", 
           history_filename = f"checkpoints/{embeddings_used}_{lr}_{batch_size}_history.csv", 

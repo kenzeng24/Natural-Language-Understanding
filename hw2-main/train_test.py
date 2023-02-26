@@ -88,7 +88,7 @@ def train(model: LSTMSentimentClassifier, train_data: Dataset,
 
         # TODO: Write your early stopping code here
         history.append(val_acc)
-        if len(history) >= patience and max(history[-patience:]) < best_val:
+        if len(history) >= patience and max(history[-patience:]) <= best_val:
             break 
         if history_filename:
             pd.DataFrame({'val acc': history}).to_csv(history_filename)
