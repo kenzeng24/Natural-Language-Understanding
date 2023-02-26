@@ -32,7 +32,7 @@ def evaluate(model: LSTMSentimentClassifier, test_data: Dataset,
     model.eval()
     correct = 0 
     with torch.no_grad():
-        for i in tqdm(range(0, len(test_data), batch_size)):
+        for i in tqdm(range(0, len(test_data), batch_size), position=0, leave=True):
             batch = test_data[i:i + batch_size]
             output = model(batch['text'], batch['lengths'])
             correct += torch.sum(output.argmax(axis=1) == batch['label'])
@@ -73,7 +73,7 @@ def train(model: LSTMSentimentClassifier, train_data: Dataset,
         # Training code
         print("Training...")
         model.train()
-        for i in tqdm(range(0, len(train_data), batch_size)):
+        for i in tqdm(range(0, len(train_data), batch_size),  position=0, leave=True):
             batch = train_data[i:i + batch_size]
             # TODO: Write your training code here
             adam.zero_grad()
