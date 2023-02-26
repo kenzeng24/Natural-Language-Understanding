@@ -1,4 +1,5 @@
 import sys
+from csv import DictWriter
 from train_test import train
 from datasets import load_dataset
 from embeddings import Embeddings
@@ -42,7 +43,25 @@ def train_lstm_model(lr=0.01, batch_size=32, testing=True, use_pretrained=True):
           filename= f"checkpoints/{embeddings_used}_{lr}_{batch_size}.pt", 
           history_filename = f"checkpoints/{embeddings_used}_{lr}_{batch_size}_history.csv", 
     )
-    evaluate(model, test_data)
+    test_acc = evaluate(model, test_data)
+    val_acc = evaluate(model, val_data)
+    
+    time = datetime.now().strftime("%m-%d-%Y_%H:%M")
+    row = {
+        'lr':lr, 
+        'batch_size': batch_size, 
+        'time':time, 
+        'pretrained':use_pretrained, 
+        'val_acc': val_acc.detach()[0],
+        'test_acc': test_acc.detach()[0],
+    }
+    if not os.path.exists('checkpoints/history.csv'):
+        pd.DataFrame(row).to_csv('checkpoints/history.csv')
+    else:
+        with open('checkpoints/history.csv', 'a') as f:
+            dictwriter_object = DictWriter(f, fieldnames=row.keys())
+            dictwriter_object.writerow(row)
+            f.close()
     
     
 def main():
