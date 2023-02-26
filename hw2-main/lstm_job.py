@@ -1,4 +1,7 @@
 import sys
+import os
+import pandas as pd
+from datetime import datetime
 from csv import DictWriter
 from train_test import train
 from datasets import load_dataset
@@ -51,12 +54,14 @@ def train_lstm_model(lr=0.01, batch_size=32, testing=True, use_pretrained=True):
         'lr':lr, 
         'batch_size': batch_size, 
         'time':time, 
-        'pretrained':use_pretrained, 
-        'val_acc': val_acc.detach()[0],
-        'test_acc': test_acc.detach()[0],
+        'pretrained': use_pretrained, 
+        'val_acc': val_acc.detach().item(),
+        'test_acc': test_acc.detach().item(),
     }
     if not os.path.exists('checkpoints/history.csv'):
-        pd.DataFrame(row).to_csv('checkpoints/history.csv')
+        pd.DataFrame(
+            {key: [value] for key, value in row.items()}
+        ).to_csv('checkpoints/history.csv', index=False)
     else:
         with open('checkpoints/history.csv', 'a') as f:
             dictwriter_object = DictWriter(f, fieldnames=row.keys())
