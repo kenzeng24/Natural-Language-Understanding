@@ -6,7 +6,7 @@ import torch.nn as nn
 import torch.optim as optim
 from datasets import Dataset
 from tqdm import tqdm
-
+import pandas as pd
 from model import LSTMSentimentClassifier
 
 
@@ -42,7 +42,7 @@ def evaluate(model: LSTMSentimentClassifier, test_data: Dataset,
 
 def train(model: LSTMSentimentClassifier, train_data: Dataset,
           val_data: Dataset, batch_size: int = 32, max_epochs: int = 5,
-          patience: int = 2, lr: float = .01, filename: str = "model.pt"):
+          patience: int = 2, lr: float = .01, filename: str = "model.pt", history_filename=None):
     """
     Problem 4c: Complete the implementation of this function. You may
     write code anywhere in the function body, though comments have been
@@ -88,9 +88,9 @@ def train(model: LSTMSentimentClassifier, train_data: Dataset,
 
         # TODO: Write your early stopping code here
         history.append(val_acc)
-        if len(history) > patience:
-            history = history[1:]
-        if len(history) == patience and max(history) < best_val:
+        if len(history) >= patience and max(history[-patience:]) < best_val:
             break 
+        if history_filename:
+            pd.DataFrame({'val acc': history}).to_csv(history_filename)
         best_val = max(best_val, val_acc)
     torch.save(model.state_dict(), filename)

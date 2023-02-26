@@ -1,17 +1,13 @@
+import sys
 from train_test import train
-import torch.nn as nn
-import torch.nn.functional as F
 from datasets import load_dataset
-from nltk.tokenize import TreebankWordTokenizer
-from datetime import datetime
-
 from embeddings import Embeddings
 from model import LSTMSentimentClassifier
 from tokenizer import Tokenizer
 from train_test import evaluate, train
 
 
-def run(lr=0.01, batch_size=32, testing=True, use_pretrained=True):
+def train_lstm_model(lr=0.01, batch_size=32, testing=True, use_pretrained=True):
     
     # get tokenizer and model 
     glove = Embeddings.from_file("data/glove_300d.txt")
@@ -31,21 +27,32 @@ def run(lr=0.01, batch_size=32, testing=True, use_pretrained=True):
     val_data = imdb["val"].with_transform(tokenizer)
     test_data = imdb["test"].with_transform(tokenizer)
     if testing:
-        train_data_small = train_data.shard(num_shards=100, index=0)
-        val_data_small = train_data_small
-        test_data_small = train_data_small
+        train_data = train_data.shard(num_shards=100, index=0)
+        val_data = train_data
+        test_data = train_data
         
     # time = datetime.now().strftime("%m-%d-%Y_%H:%M")
     embeddings_used = 'random' if not use_pretrained else 'glove' 
     
     train(model, train_data, val_data, 
           batch_size=batch_size, 
-          max_epoch=50,
-          patience=5, 
+          max_epochs=1,
+          patience=1, 
           lr=lr, 
-          filename= f"model_{embeddings_used}_{lr}_{batch_size}.pt"
-   )
+          filename= f"checkpoints/{embeddings_used}_{lr}_{batch_size}.pt", 
+          history_filename = f"checkpoints/{embeddings_used}_{lr}_{batch_size}_history.csv", 
+    )
+    evaluate(model, test_data)
+    
+    
+def main():
+    pretrained = bool(sys.argv[1])
+    lr = float(sys.argv[2])
+    batch_size = int(sys.argv[3])
+    train_lstm_model(use_pretrained=pretrained, lr=lr, batch_size=batch_size)
+    
 
-if __init__ == "__main__":
-      run(lr=0.01, batch_size=32)
+if __name__ == "__main__":
+    
+    main()
 
