@@ -31,8 +31,13 @@ def evaluate(model: LSTMSentimentClassifier, test_data: Dataset,
     """
     model.eval()
     correct = 0 
+    if torch.cuda.is_available():
+        device = torch.device('cuda:0')
     with torch.no_grad():
         for i in tqdm(range(0, len(test_data), batch_size), position=0, leave=True):
+            if torch.cuda.is_available():
+                batch['text'] = batch['text'].to(device)
+                batch['label'] = batch['label'].to(device)
             batch = test_data[i:i + batch_size]
             output = model(batch['text'], batch['lengths'])
             correct += torch.sum(output.argmax(axis=1) == batch['label'])
@@ -68,6 +73,7 @@ def train(model: LSTMSentimentClassifier, train_data: Dataset,
     best_val = -1
     if torch.cuda.is_available():
         device = torch.device('cuda:0')
+
     for epoch in range(max_epochs):
         print("Epoch {} of {}".format(epoch + 1, max_epochs))
 
@@ -89,6 +95,8 @@ def train(model: LSTMSentimentClassifier, train_data: Dataset,
 
         # Test on validation data
         print("Evaluating on validation data...")
+        if torch.cuda.is_available():
+            
         val_acc = evaluate(model, val_data, batch_size=batch_size)
         print("Validation accuracy: {:.3f}".format(val_acc))
 
