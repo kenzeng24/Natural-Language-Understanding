@@ -56,8 +56,8 @@ def train_lstm_model(lr=0.01, batch_size=32, testing=False, use_pretrained=True)
         'batch_size': batch_size, 
         'time':time, 
         'pretrained': use_pretrained, 
-        'val_acc': val_acc.detach().item(),
-        'test_acc': test_acc.detach().item(),
+        'val_acc': val_acc.detach().cpu().item(),
+        'test_acc': test_acc.detach().cpu().item(),
     }
     if not os.path.exists('checkpoints/history.csv'):
         pd.DataFrame(
