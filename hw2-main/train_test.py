@@ -100,7 +100,7 @@ def train(model: LSTMSentimentClassifier, train_data: Dataset,
         print("Validation accuracy: {:.3f}".format(val_acc))
 
         # TODO: Write your early stopping code here
-        history.append(val_acc)
+        history.append(val_acc.detach().cpu().item())
         if len(history) >= patience and max(history[-patience:]) <= best_val:
             break 
         if history_filename:
