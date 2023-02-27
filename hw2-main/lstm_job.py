@@ -70,7 +70,7 @@ def train_lstm_model(lr=0.01, batch_size=32, testing=False, use_pretrained=True)
     
     
 def main():
-    pretrained = bool(sys.argv[1])
+    pretrained = sys.argv[1] == 'True'
     lr = float(sys.argv[2])
     batch_size = int(sys.argv[3])
     train_lstm_model(use_pretrained=pretrained, lr=lr, batch_size=batch_size)
