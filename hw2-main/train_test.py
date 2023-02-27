@@ -32,7 +32,7 @@ def evaluate(model: LSTMSentimentClassifier, test_data: Dataset,
     model.eval()
     correct = 0 
     if torch.cuda.is_available():
-        device = torch.device('cuda:0')
+        device = torch.device('cuda')
     with torch.no_grad():
         for i in tqdm(range(0, len(test_data), batch_size), position=0, leave=True):
             batch = test_data[i:i + batch_size]
@@ -73,7 +73,7 @@ def train(model: LSTMSentimentClassifier, train_data: Dataset,
     history = []
     best_val = -1
     if torch.cuda.is_available():
-        device = torch.device('cuda:0')
+        device = torch.device('cuda')
 
     for epoch in range(max_epochs):
         print("Epoch {} of {}".format(epoch + 1, max_epochs))
