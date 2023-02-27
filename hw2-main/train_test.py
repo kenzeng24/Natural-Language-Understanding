@@ -75,7 +75,7 @@ def train(model: LSTMSentimentClassifier, train_data: Dataset,
         print("Training...")
         model.train()
         if torch.cuda.is_available():
-            model = mode.to(device)
+            model = model.to(device)
         for i in tqdm(range(0, len(train_data), batch_size),  position=0, leave=True):
             adam.zero_grad()
             batch = train_data[i:i + batch_size]
