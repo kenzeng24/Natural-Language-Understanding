@@ -6,7 +6,7 @@
 #SBATCH --mem=2GB
 #SBATCH --job-name=lstm
 #SBATCH --mail-type=END
-#SBATCH --output=slurm_%j.out
+#SBATCH --output=jobs/slurm_%j.out
 
 cd /gpfs/home/kgz2437/pathology_parsing/testing/NLU/Natural-Language-Understanding/hw2-main
 python lstm_job.py False 0.01 32

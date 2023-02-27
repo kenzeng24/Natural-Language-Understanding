@@ -73,8 +73,13 @@ def train(model: LSTMSentimentClassifier, train_data: Dataset,
         # Training code
         print("Training...")
         model.train()
+        if torch.cuda.is_available():
+            model = mode.cuda()
         for i in tqdm(range(0, len(train_data), batch_size),  position=0, leave=True):
             batch = train_data[i:i + batch_size]
+            if torch.cuda.is_available():
+                batch['text'] = batch['text'].cuda()
+                batch['label'] = batch['label'].cuda()
             # TODO: Write your training code here
             adam.zero_grad()
             loss = loss_function(model(batch['text'], batch['lengths']), batch['label'])
@@ -92,5 +97,10 @@ def train(model: LSTMSentimentClassifier, train_data: Dataset,
             break 
         if history_filename:
             pd.DataFrame({'val acc': history}).to_csv(history_filename)
+        if val_acc > best_val:
+            torch.save(model.state_dict(), filename)
         best_val = max(best_val, val_acc)
-    torch.save(model.state_dict(), filename)
+        
+    model.load_state_dict(torch.load(filename))
+      
+    
