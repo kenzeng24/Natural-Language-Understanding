@@ -37,7 +37,7 @@ def train_lstm_model(lr=0.01, batch_size=32, testing=False, use_pretrained=True)
         
     # time = datetime.now().strftime("%m-%d-%Y_%H:%M")
     embeddings_used = 'random' if not use_pretrained else 'glove' 
-    filename = f"checkpoints/{embeddings_used}_{lr}_{batch_size}.pt", 
+    filename = f"checkpoints/{embeddings_used}_{lr}_{batch_size}.pt"
     train(model, train_data, val_data, 
           batch_size=batch_size, 
           max_epochs=30,
