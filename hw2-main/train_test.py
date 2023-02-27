@@ -66,7 +66,8 @@ def train(model: LSTMSentimentClassifier, train_data: Dataset,
     adam = optim.Adam(model.parameters(), lr=lr)
     history = []
     best_val = -1
-
+    if torch.cuda.is_available():
+        device = torch.device('cuda:0')
     for epoch in range(max_epochs):
         print("Epoch {} of {}".format(epoch + 1, max_epochs))
 
@@ -74,14 +75,14 @@ def train(model: LSTMSentimentClassifier, train_data: Dataset,
         print("Training...")
         model.train()
         if torch.cuda.is_available():
-            model = mode.cuda()
+            model = mode.to(device)
         for i in tqdm(range(0, len(train_data), batch_size),  position=0, leave=True):
+            adam.zero_grad()
             batch = train_data[i:i + batch_size]
             if torch.cuda.is_available():
-                batch['text'] = batch['text'].cuda()
-                batch['label'] = batch['label'].cuda()
+                batch['text'] = batch['text'].to(device)
+                batch['label'] = batch['label'].to(device)
             # TODO: Write your training code here
-            adam.zero_grad()
             loss = loss_function(model(batch['text'], batch['lengths']), batch['label'])
             loss.backward()
             adam.step()
