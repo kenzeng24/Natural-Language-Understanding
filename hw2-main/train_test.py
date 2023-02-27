@@ -94,9 +94,7 @@ def train(model: LSTMSentimentClassifier, train_data: Dataset,
             adam.step()
 
         # Test on validation data
-        print("Evaluating on validation data...")
-        if torch.cuda.is_available():
-            
+        print("Evaluating on validation data..."
         val_acc = evaluate(model, val_data, batch_size=batch_size)
         print("Validation accuracy: {:.3f}".format(val_acc))
 
