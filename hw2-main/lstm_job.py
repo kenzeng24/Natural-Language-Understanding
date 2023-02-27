@@ -1,5 +1,6 @@
 import sys
 import os
+import torch
 import pandas as pd
 from datetime import datetime
 from csv import DictWriter
@@ -9,6 +10,7 @@ from embeddings import Embeddings
 from model import LSTMSentimentClassifier
 from tokenizer import Tokenizer
 from train_test import evaluate, train
+
 
 
 def train_lstm_model(lr=0.01, batch_size=32, testing=False, use_pretrained=True):
