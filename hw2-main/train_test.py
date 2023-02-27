@@ -35,10 +35,11 @@ def evaluate(model: LSTMSentimentClassifier, test_data: Dataset,
         device = torch.device('cuda:0')
     with torch.no_grad():
         for i in tqdm(range(0, len(test_data), batch_size), position=0, leave=True):
+            batch = test_data[i:i + batch_size]
             if torch.cuda.is_available():
                 batch['text'] = batch['text'].to(device)
                 batch['label'] = batch['label'].to(device)
-            batch = test_data[i:i + batch_size]
+            
             output = model(batch['text'], batch['lengths'])
             correct += torch.sum(output.argmax(axis=1) == batch['label'])
             
