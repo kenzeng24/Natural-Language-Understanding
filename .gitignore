@@ -154,3 +154,4 @@ cython_debug/
 *.pt 
 *.DS_Store
 *checkpoints
+hw2-main/jobs/slurm*
