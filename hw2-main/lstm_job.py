@@ -13,7 +13,13 @@ from train_test import evaluate, train
 
 
 
-def train_lstm_model(lr=0.01, batch_size=32, testing=False, use_pretrained=True):
+def train_lstm_model(
+    use_pretrained=True, 
+    lr=0.01, 
+    batch_size=32, 
+    max_epochs=30,
+    patience=3, 
+    testing=False):
     
     # get tokenizer and model 
     glove = Embeddings.from_file("data/glove_300d.txt")
@@ -42,8 +48,8 @@ def train_lstm_model(lr=0.01, batch_size=32, testing=False, use_pretrained=True)
     filename = f"checkpoints/{embeddings_used}_{lr}_{batch_size}.pt"
     train(model, train_data, val_data, 
           batch_size=batch_size, 
-          max_epochs=30,
-          patience=3, 
+          max_epochs=max_epochs,
+          patience=patience, 
           lr=lr, 
           filename= filename, 
           history_filename = f"checkpoints/{embeddings_used}_{lr}_{batch_size}_history.csv", 
@@ -57,6 +63,8 @@ def train_lstm_model(lr=0.01, batch_size=32, testing=False, use_pretrained=True)
         'lr':lr, 
         'batch_size': batch_size, 
         'time':time, 
+        'max_epochs':max_epochs,
+        'patience': patience,
         'pretrained': use_pretrained, 
         'val_acc': val_acc.detach().cpu().item(),
         'test_acc': test_acc.detach().cpu().item(),
@@ -76,7 +84,16 @@ def main():
     pretrained = sys.argv[1] == 'True'
     lr = float(sys.argv[2])
     batch_size = int(sys.argv[3])
-    train_lstm_model(use_pretrained=pretrained, lr=lr, batch_size=batch_size)
+    max_epochs = int(sys.argv[4])
+    patience = int(sys.argv[5])
+    
+    train_lstm_model(
+        use_pretrained=pretrained, 
+        lr=lr, 
+        batch_size=batch_size, 
+        max_epochs=max_epochs, 
+        patience=patience
+    )
     
 
 if __name__ == "__main__":
