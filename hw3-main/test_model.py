@@ -23,7 +23,9 @@ def init_tester(directory: str) -> Trainer:
         saved
     :return: A Trainer used for testing
     """
-    raise NotImplementedError("Problem 1f has not been completed yet!")
+    model = model = BertForSequenceClassification\
+        .from_pretrained(directory, num_labels=2)
+    return Trainer(model=model)
 
 
 if __name__ == "__main__":  # Use this script to test your model

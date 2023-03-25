@@ -2,16 +2,39 @@
 Code for Problem 1 of HW 3.
 """
 import pickle
+import sys 
 from typing import Any, Dict
+from datetime import datetime
 
 import evaluate
 import numpy as np
 import optuna
-from datasets import Dataset, load_dataset
+import torch.nn as nn 
+from datasets import Dataset, load_dataset, load_metric
 from transformers import BertTokenizerFast, BertForSequenceClassification, \
     Trainer, TrainingArguments, EvalPrediction
+from transformers import EarlyStoppingCallback
 
 
+class CustomDataset(torch.utils.data.Dataset):
+    def __init__(self, data, tokenizer):
+        self.data = data
+        self.tokenizer = tokenizer
+
+    def __getitem__(self, index):
+        data = self.data[index]
+        encoding = self.tokenizer(
+            data['text'], 
+            truncation=True, 
+            max_length=132,
+            padding='max_length'
+        )
+        return dict(**encoding, **data)
+
+    def __len__(self):
+        return len(self.data)
+
+    
 
 def preprocess_dataset(dataset: Dataset, tokenizer: BertTokenizerFast) \
         -> Dataset:
@@ -25,7 +48,7 @@ def preprocess_dataset(dataset: Dataset, tokenizer: BertTokenizerFast) \
     :param tokenizer: A tokenizer
     :return: The dataset, prepreprocessed using the tokenizer
     """
-    return dataset.map(lambda x: tokenizer(x), batched=True)
+    return CustomDataset(dataset, tokenizer)
     
 
 
@@ -48,7 +71,31 @@ def init_model(trial: Any, model_name: str, use_bitfit: bool = False) -> \
         than bias terms
     :return: A newly initialized pre-trained Transformer classifier
     """
-    raise NotImplementedError("Problem 1e has not been completed yet!")
+    model = BertForSequenceClassification.from_pretrained(
+        "prajjwal1/bert-tiny", num_labels=2
+    )
+    if use_bitfit:
+        for key, value in dict(model.named_parameters()).items():
+            if 'bias' not in key:
+                value.requires_grad = False 
+    return model 
+
+
+class CustomTrainer(Trainer):
+    def compute_loss(self, model, inputs, return_outputs=False):
+        labels = inputs["labels"]
+        outputs = model(**inputs)
+        logits = outputs["logits"]
+        loss_fct = nn.CrossEntropyLoss()
+        loss = loss_fct(logits.view(-1, self.model.config.num_labels), labels.view(-1))
+        return (loss, outputs) if return_outputs else loss
+
+
+def compute_metrics(eval_preds):
+    metric = load_metric('accuracy')
+    preds, labels = eval_preds
+    preds = np.argmax(preds, axis=1)
+    return metric.compute(predictions=preds, references=labels)
 
 
 def init_trainer(model_name: str, train_data: Dataset, val_data: Dataset,
@@ -68,7 +115,33 @@ def init_trainer(model_name: str, train_data: Dataset, val_data: Dataset,
         than bias terms
     :return: A Trainer used for training
     """
-    raise NotImplementedError("Problem 1f has not been completed yet!")
+
+    # Define training arguments
+    training_args = TrainingArguments(
+        output_dir='./results',
+        num_train_epochs=20,
+        per_device_train_batch_size=64,
+        gradient_accumulation_steps=2,
+        learning_rate=1e-3,
+        disable_tqdm=False,
+        evaluation_strategy="steps",
+        eval_steps=500,
+        load_best_model_at_end=True,
+    )
+    # Create trainer object
+    trainer = CustomTrainer(
+        model=None,
+        model_init=lambda: init_model(None, model_name, use_bitfit),
+        args=training_args,
+        train_dataset=train_data,
+        eval_dataset=val_data,
+        compute_metrics=compute_metrics,
+        callbacks=[EarlyStoppingCallback(early_stopping_patience=3)],
+    )
+    return trainer
+
+
+# https://discuss.huggingface.co/t/using-hyperparameter-search-in-trainer/785/55?page=2
 
 
 def hyperparameter_search_settings() -> Dict[str, Any]:
@@ -81,10 +154,27 @@ def hyperparameter_search_settings() -> Dict[str, Any]:
 
     :return: Keyword arguments for Trainer.hyperparameter_search
     """
-    raise NotImplementedError("Problem 1g has not been completed yet!")
+    def optuna_hp_space(trial):
+        return {
+            "learning_rate": trial.suggest_float("learning_rate", 1e-6, 1e-4, log=True),
+            "per_device_train_batch_size": trial.suggest_categorical("per_device_train_batch_size", [16, 32, 64, 128]),
+        }
+    return dict(
+        direction="maximize",
+         backend="optuna",
+         hp_space=optuna_hp_space,
+         n_trials=10,
+         compute_objective=lambda metrics: metrics['eval_accuracy'],
+    )
 
 
 if __name__ == "__main__":  # Use this script to train your model
+    
+    use_bitfit = True 
+    filename = 
+    if len(sys.argv) > 1:
+        use_bitfit = sys.argv[1] == 'True'
+    
     model_name = "prajjwal1/bert-tiny"
 
     # Load IMDb dataset and create validation split
@@ -103,9 +193,11 @@ if __name__ == "__main__":  # Use this script to train your model
 
     # Set up trainer
     trainer = init_trainer(model_name, imdb["train"], imdb["val"],
-                           use_bitfit=True)
+                           use_bitfit=use_bitfit)
 
     # Train and save the best hyperparameters
     best = trainer.hyperparameter_search(**hyperparameter_search_settings())
-    with open("train_results.p", "wb") as f:
+    bitfit_param = 'bitfit' if use_bitfit else 'no-bitfit'
+    time = datetime.now().strftime("%m-%d-%Y.%H-%M-%S")
+    with open(f"train_results.{bitfit_param}.{time}.pickle", "wb") as f:
         pickle.dump(best, f)
