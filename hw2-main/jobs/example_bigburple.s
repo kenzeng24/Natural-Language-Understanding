@@ -10,6 +10,6 @@
 #SBATCH --gres=gpu:1
 
 cd /gpfs/home/kgz2437/pathology_parsing/testing/NLU/Natural-Language-Understanding/hw2-main
-python lstm_job.py False 0.01 16
-python lstm_job.py False 0.05 16
-python lstm_job.py False 0.005 16
+python lstm_job.py False 0.005 64 30 5 
+python lstm_job.py False 0.005 64 10 2
+python lstm_job.py False 0.005 64 15 3

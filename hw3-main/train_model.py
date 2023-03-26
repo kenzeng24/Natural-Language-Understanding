@@ -3,6 +3,7 @@ Code for Problem 1 of HW 3.
 """
 import pickle
 import sys 
+import torch 
 from typing import Any, Dict
 from datetime import datetime
 
@@ -119,7 +120,7 @@ def init_trainer(model_name: str, train_data: Dataset, val_data: Dataset,
     # Define training arguments
     training_args = TrainingArguments(
         output_dir='./results',
-        num_train_epochs=20,
+        num_train_epochs=10,
         per_device_train_batch_size=64,
         gradient_accumulation_steps=2,
         learning_rate=1e-3,
@@ -163,15 +164,14 @@ def hyperparameter_search_settings() -> Dict[str, Any]:
         direction="maximize",
          backend="optuna",
          hp_space=optuna_hp_space,
-         n_trials=10,
+         n_trials=30,
          compute_objective=lambda metrics: metrics['eval_accuracy'],
     )
 
 
 if __name__ == "__main__":  # Use this script to train your model
     
-    use_bitfit = True 
-    filename = 
+    use_bitfit = True  
     if len(sys.argv) > 1:
         use_bitfit = sys.argv[1] == 'True'
     
@@ -183,13 +183,14 @@ if __name__ == "__main__":  # Use this script to train your model
     imdb["train"] = split["train"]
     imdb["val"] = split["test"]
     del imdb["unsupervised"]
-    del imdb["test"]
+    # del imdb["test"]
 
     # Preprocess the dataset for the trainer
     tokenizer = BertTokenizerFast.from_pretrained(model_name)
 
     imdb["train"] = preprocess_dataset(imdb["train"], tokenizer)
     imdb["val"] = preprocess_dataset(imdb["val"], tokenizer)
+    imdb["test"] = preprocess_dataset(imdb["test"], tokenizer)
 
     # Set up trainer
     trainer = init_trainer(model_name, imdb["train"], imdb["val"],
@@ -199,5 +200,7 @@ if __name__ == "__main__":  # Use this script to train your model
     best = trainer.hyperparameter_search(**hyperparameter_search_settings())
     bitfit_param = 'bitfit' if use_bitfit else 'no-bitfit'
     time = datetime.now().strftime("%m-%d-%Y.%H-%M-%S")
-    with open(f"train_results.{bitfit_param}.{time}.pickle", "wb") as f:
+    with open(f"outputs/train_results.{bitfit_param}.{time}.pickle", "wb") as f:
         pickle.dump(best, f)
+    trainer.save_model(f'checkpoints/checkpoint.{bitfit_param}.{time}')
+
