@@ -121,9 +121,9 @@ def init_trainer(model_name: str, train_data: Dataset, val_data: Dataset,
     training_args = TrainingArguments(
         output_dir='./results',
         num_train_epochs=4,
-        per_device_train_batch_size=64,
-        gradient_accumulation_steps=2,
-        learning_rate=1e-4,
+        per_device_train_batch_size=32,
+        #gradient_accumulation_steps=2,
+        learning_rate=1e-3,
         disable_tqdm=False,
         evaluation_strategy="steps",
         eval_steps=500,
@@ -155,9 +155,11 @@ def hyperparameter_search_settings() -> Dict[str, Any]:
 
     :return: Keyword arguments for Trainer.hyperparameter_search
     """
+    # for non-bitfit: [3e-4, 1e-4, 5e-5, 3e-5, 2e-5]
+    # for bitfit:     [3e-3, 1e-3, 3e-4, 1e-4, 5e-5]
     def optuna_hp_space(trial):
         return {
-            "learning_rate": trial.suggest_categorical("learning_rate", [3e-4,1e-4, 5e-5,3e-5, 2e-5]),
+            "learning_rate": trial.suggest_categorical("learning_rate", [3e-4, 1e-4, 5e-5, 3e-5, ]),
             "per_device_train_batch_size": trial.suggest_categorical("per_device_train_batch_size", [8, 16, 32, 64, 128]),
         }
     return dict(

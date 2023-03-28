@@ -11,3 +11,4 @@
 
 
 # Problem 2a: Write a script to be executed by your HPC job in order to fine-tune a BERT-tiny model.
+python train_model.py True

@@ -5,7 +5,7 @@
 #SBATCH --cpus-per-task=1
 #SBATCH --time=10:00:00
 #SBATCH --mem=10GB
-#SBATCH --job-name=BERT-optuna
+#SBATCH --job-name=bert-bitfit
 #SBATCH --mail-type=END
 #SBATCH --output=outputs/slurm_%j.out
 #SBATCH --gres=gpu:1
