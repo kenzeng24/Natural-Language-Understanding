@@ -155,3 +155,6 @@ cython_debug/
 *.DS_Store
 *checkpoints
 hw2-main/jobs/slurm*
+hw3-main/checkpoints
+hw3-main/outputs/slurm*
+hw3-main/results/*

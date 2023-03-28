@@ -120,10 +120,10 @@ def init_trainer(model_name: str, train_data: Dataset, val_data: Dataset,
     # Define training arguments
     training_args = TrainingArguments(
         output_dir='./results',
-        num_train_epochs=10,
+        num_train_epochs=4,
         per_device_train_batch_size=64,
         gradient_accumulation_steps=2,
-        learning_rate=1e-3,
+        learning_rate=1e-4,
         disable_tqdm=False,
         evaluation_strategy="steps",
         eval_steps=500,
@@ -157,14 +157,14 @@ def hyperparameter_search_settings() -> Dict[str, Any]:
     """
     def optuna_hp_space(trial):
         return {
-            "learning_rate": trial.suggest_float("learning_rate", 1e-6, 1e-4, log=True),
-            "per_device_train_batch_size": trial.suggest_categorical("per_device_train_batch_size", [16, 32, 64, 128]),
+            "learning_rate": trial.suggest_categorical("learning_rate", [3e-4,1e-4, 5e-5,3e-5, 2e-5]),
+            "per_device_train_batch_size": trial.suggest_categorical("per_device_train_batch_size", [8, 16, 32, 64, 128]),
         }
     return dict(
         direction="maximize",
          backend="optuna",
          hp_space=optuna_hp_space,
-         n_trials=30,
+         n_trials=25,
          compute_objective=lambda metrics: metrics['eval_accuracy'],
     )
 
@@ -203,4 +203,5 @@ if __name__ == "__main__":  # Use this script to train your model
     with open(f"outputs/train_results.{bitfit_param}.{time}.pickle", "wb") as f:
         pickle.dump(best, f)
     trainer.save_model(f'checkpoints/checkpoint.{bitfit_param}.{time}')
+    print(trainer.evaluate(imdb['test']))
 
