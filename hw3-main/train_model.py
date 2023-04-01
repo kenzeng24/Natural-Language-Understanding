@@ -122,7 +122,6 @@ def init_trainer(model_name: str, train_data: Dataset, val_data: Dataset,
         output_dir='./results',
         num_train_epochs=4,
         per_device_train_batch_size=32,
-        #gradient_accumulation_steps=2,
         learning_rate=1e-3,
         disable_tqdm=False,
         evaluation_strategy="steps",
@@ -142,9 +141,6 @@ def init_trainer(model_name: str, train_data: Dataset, val_data: Dataset,
     return trainer
 
 
-# https://discuss.huggingface.co/t/using-hyperparameter-search-in-trainer/785/55?page=2
-
-
 def hyperparameter_search_settings() -> Dict[str, Any]:
     """
     Problem 1g: Implement this function.
@@ -157,17 +153,21 @@ def hyperparameter_search_settings() -> Dict[str, Any]:
     """
     # for non-bitfit: [3e-4, 1e-4, 5e-5, 3e-5, 2e-5]
     # for bitfit:     [3e-3, 1e-3, 3e-4, 1e-4, 5e-5]
-    def optuna_hp_space(trial):
-        return {
-            "learning_rate": trial.suggest_categorical("learning_rate", [3e-4, 1e-4, 5e-5, 3e-5, ]),
-            "per_device_train_batch_size": trial.suggest_categorical("per_device_train_batch_size", [8, 16, 32, 64, 128]),
-        }
+    
+    search_space = {
+        "seed":[824],
+        "num_train_epochs":[4],
+        "learning_rate":[3e-4, 1e-4, 5e-5, 3e-5], 
+        "per_device_train_batch_size":[8, 16, 32, 64, 128],
+    }
+    
     return dict(
         direction="maximize",
-         backend="optuna",
-         hp_space=optuna_hp_space,
-         n_trials=25,
-         compute_objective=lambda metrics: metrics['eval_accuracy'],
+        backend="optuna",
+        hp_space=optuna_hp_space,
+        n_trials=25,
+        sampler= optuna.samplers.GridSampler(search_space)
+        compute_objective=lambda metrics: metrics['eval_accuracy'],
     )
 
 
