@@ -164,9 +164,8 @@ def hyperparameter_search_settings() -> Dict[str, Any]:
     return dict(
         direction="maximize",
         backend="optuna",
-        hp_space=optuna_hp_space,
         n_trials=25,
-        sampler= optuna.samplers.GridSampler(search_space)
+        sampler= optuna.samplers.GridSampler(search_space),
         compute_objective=lambda metrics: metrics['eval_accuracy'],
     )
 
