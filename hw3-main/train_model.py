@@ -27,7 +27,7 @@ class CustomDataset(torch.utils.data.Dataset):
         encoding = self.tokenizer(
             data['text'], 
             truncation=True, 
-            max_length=132,
+            max_length=512,
             padding='max_length'
         )
         return dict(**encoding, **data)
@@ -125,9 +125,9 @@ def init_trainer(model_name: str, train_data: Dataset, val_data: Dataset,
         # learning_rate=3e-4,
         disable_tqdm=False,
 	metric_for_best_model='eval_accuracy',
-        evaluation_strategy="epoch",
-	save_strategy="epoch",
-        load_best_model_at_end=True,
+        #evaluation_strategy="epoch",
+	#save_strategy="epoch",
+        #load_best_model_at_end=True,
     )
     # Create trainer object
     trainer = CustomTrainer(
@@ -160,7 +160,7 @@ def hyperparameter_search_settings() -> Dict[str, Any]:
             "per_device_train_batch_size": trial.suggest_categorical("per_device_train_batch_size", [8, 16, 32, 64, 128]),
         }
     search_space = {
-        "seed":[824],
+        "seed":[3463],
         "num_train_epochs":[4],
         "learning_rate":[3e-4, 1e-4, 5e-5, 3e-5], 
         "per_device_train_batch_size":[8, 16, 32, 64, 128],
