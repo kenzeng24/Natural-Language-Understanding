@@ -125,9 +125,9 @@ def init_trainer(model_name: str, train_data: Dataset, val_data: Dataset,
         # learning_rate=3e-4,
         disable_tqdm=False,
 	metric_for_best_model='eval_accuracy',
-        # evaluation_strategy="epoch",
-	# save_strategy="epoch",
-        # load_best_model_at_end=True,
+        evaluation_strategy="epoch",
+	save_strategy="epoch",
+        load_best_model_at_end=True,
     )
     # Create trainer object
     trainer = CustomTrainer(
@@ -207,6 +207,8 @@ if __name__ == "__main__":  # Use this script to train your model
     best = trainer.hyperparameter_search(**hyperparameter_search_settings())
     bitfit_param = 'bitfit' if use_bitfit else 'no-bitfit'
     time = datetime.now().strftime("%m-%d-%Y.%H-%M-%S")
+    with open(f"outputs/train_results.{bitfit_param}.{time}.pickle", "wb") as f:
+        pickle.dump(best, f)
     trainer.save_model(f'checkpoints/checkpoint.{bitfit_param}.{time}')
     print(trainer.evaluate(imdb['test']))
 

@@ -1,14 +1,12 @@
-"""
-Code for Problem 1 of HW 3.
-"""
 import pickle
-
+import sys
+import os
 import evaluate
 from datasets import load_dataset
 from transformers import BertTokenizerFast, BertForSequenceClassification, \
     Trainer, TrainingArguments
 
-from train_model import preprocess_dataset
+from train_model import preprocess_dataset, compute_metrics
 
 
 def init_tester(directory: str) -> Trainer:
@@ -23,14 +21,16 @@ def init_tester(directory: str) -> Trainer:
         saved
     :return: A Trainer used for testing
     """
-    model = model = BertForSequenceClassification\
+    model = BertForSequenceClassification\
         .from_pretrained(directory, num_labels=2)
-    return Trainer(model=model)
+    return Trainer(model=model,compute_metrics=compute_metrics)
 
-
-if __name__ == "__main__":  # Use this script to test your model
+if __name__ == "__main__":
     model_name = "prajjwal1/bert-tiny"
 
+    # checkpoint = 'checkpoints/checkpoint.no-bitfit.04-05-2023.05-07-43'
+    if len(sys.argv) > 1:
+        checkpoint = sys.argv[1]
     # Load IMDb dataset
     imdb = load_dataset("imdb")
     del imdb["train"]
@@ -41,9 +41,9 @@ if __name__ == "__main__":  # Use this script to test your model
     imdb["test"] = preprocess_dataset(imdb["test"], tokenizer)
 
     # Set up tester
-    tester = init_tester("path_to_your_best_model")
+    tester = init_tester(checkpoint)
 
     # Test
     results = tester.predict(imdb["test"])
-    with open("test_results.p", "wb") as f:
+    with open(f"outputs/{os.path.basename(checkpoint)}.test_results.p", "wb") as f:
         pickle.dump(results, f)
