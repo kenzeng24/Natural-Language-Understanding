@@ -120,14 +120,14 @@ def init_trainer(model_name: str, train_data: Dataset, val_data: Dataset,
     # Define training arguments
     training_args = TrainingArguments(
         output_dir='./results',
-        num_train_epochs=4,
-        per_device_train_batch_size=16,
-        learning_rate=3e-4,
+        # num_train_epochs=4,
+        # per_device_train_batch_size=16,
+        # learning_rate=3e-4,
         disable_tqdm=False,
 	metric_for_best_model='eval_accuracy',
-        evaluation_strategy="epoch",
-	save_strategy="epoch",
-        load_best_model_at_end=True,
+        # evaluation_strategy="epoch",
+	# save_strategy="epoch",
+        # load_best_model_at_end=True,
     )
     # Create trainer object
     trainer = CustomTrainer(
@@ -137,7 +137,7 @@ def init_trainer(model_name: str, train_data: Dataset, val_data: Dataset,
         train_dataset=train_data,
         eval_dataset=val_data,
         compute_metrics=compute_metrics,
-        callbacks=[EarlyStoppingCallback(early_stopping_patience=3)],
+        # callbacks=[EarlyStoppingCallback(early_stopping_patience=3)],
     )
     return trainer
 
@@ -207,8 +207,6 @@ if __name__ == "__main__":  # Use this script to train your model
     best = trainer.hyperparameter_search(**hyperparameter_search_settings())
     bitfit_param = 'bitfit' if use_bitfit else 'no-bitfit'
     time = datetime.now().strftime("%m-%d-%Y.%H-%M-%S")
-    with open(f"outputs/train_results.{bitfit_param}.{time}.pickle", "wb") as f:
-        pickle.dump(best, f)
     trainer.save_model(f'checkpoints/checkpoint.{bitfit_param}.{time}')
     print(trainer.evaluate(imdb['test']))
 
