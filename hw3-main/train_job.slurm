@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=train_model
-#SBATCH --output=/scratch/kgz2437/bert_finetuning/slurm_%j.out
-#SBATCH --error=/scratch/kgz2437/bert_finetuning/slurm_%j.err
+#SBATCH --output=/scratch/kgz2437/bert_finetuning/train_with_bitfit.out
+#SBATCH --error=/scratch/kgz2437/bert_finetuning/train_with_bitfit.err
 #SBATCH --account=ds_ga_1012_2023sp
 #SBATCH --partition=nls8-v100-1
 #SBATCH --nodes=1
