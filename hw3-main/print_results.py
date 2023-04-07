@@ -11,6 +11,8 @@ for filename in [
 "train_results.bitfit.04-06-2023.21-19-03.pickle",
 "checkpoint.bitfit.04-06-2023.21-19-03.test_results.p", 
 "checkpoint.no-bitfit.04-06-2023.21-23-34.test_results.p",
+'train_results_with_bitfit.p',
+'train_results_without_bitfit.p',
 ]:
 	with open(os.path.join(PATH, filename) , 'rb') as f:
 		results = pickle.load(f)

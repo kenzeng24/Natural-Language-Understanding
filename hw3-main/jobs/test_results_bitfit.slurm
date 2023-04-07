@@ -11,5 +11,5 @@
 #SBATCH --gres=gpu:1
 
 cd /gpfs/home/kgz2437/pathology_parsing/testing/NLU/Natural-Language-Understanding/hw3-main
-python test_model.py outputs/checkpoint.bitfit.04-06-2023.21-19-03
-python test_model.py outputs/checkpoint.no-bitfit.04-06-2023.21-23-34
+python test_model.py outputs/checkpoint_without_bitfit
+python test_model.py outputs/checkpoint_with_bitfit
