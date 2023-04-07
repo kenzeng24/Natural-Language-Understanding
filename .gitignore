@@ -160,3 +160,4 @@ hw3-main/outputs/slurm*
 hw3-main/results/*
 hw3-main/tmp_trainer
 hw3-main/__pycache__
+hw3-main/outputs/checkpoint*
